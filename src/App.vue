@@ -1,8 +1,8 @@
 <template>
   <div class="container">
     <h1 class="title">Doom Fire Effect</h1>
-    <a target="_blank" href="https://github.com/cleitonper/doom-fire-algorithm">
-      https://github.com/cleitonper/doom-fire-algorithm
+    <a target="_blank" href="https://github.com/cleitonper/doom-fire-algorithm/tree/feature/canvas">
+      https://github.com/cleitonper/doom-fire-algorithm/tree/feature/canvas
     </a>
     <fire-wall
       class="firewall"
@@ -11,7 +11,6 @@
       :height="height"
       :debug="debug" />
     <div class="actions">
-      <btn-8bit @click.native="toggleDebug()">Toggle Debug</btn-8bit>
       <btn-8bit @click.native="decreaseFireIntensity()">-</btn-8bit>
       <btn-8bit @click.native="decreaseFireToMinIntensity()">Min</btn-8bit>
       <btn-8bit @click.native="increaseFireToMaxIntensity()">Max</btn-8bit>
@@ -32,17 +31,12 @@
     },
   })
   export default class App extends Vue {
-    public debug = false;
-    public width = 20;
-    public height = 13;
+    public width = 200;
+    public height = 80;
 
     public $refs!: {
       firewall: FireWall,
     };
-
-    public toggleDebug(): void {
-      this.debug = !this.debug;
-    }
 
     public decreaseFireIntensity() {
       this.$refs.firewall.decreaseIntensity();
@@ -76,6 +70,7 @@
 
   .firewall {
     margin-bottom: 18px;
+    border: 4px solid  #000;
   }
 
   .container {
@@ -96,10 +91,5 @@
     justify-content: center;
     align-items: center;
     width: 220px;
-  }
-
-  .actions button:first-child {
-    display: block;
-    width: 100%;
   }
 </style>

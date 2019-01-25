@@ -1,38 +1,19 @@
 <template>
-  <table>
-    <fire-row
-      v-for="row in height"
-      :key="row">
-      <fire-cell
-        :debug="debug"
-        v-for="column in width"
-        :key="calculatePixelIndex(row, column, width)"
-        :index="calculatePixelIndex(row, column, width)"
-        :intensity="pixels[calculatePixelIndex(row, column, width)]">
-      </fire-cell>
-    </fire-row>
-  </table>
+  <canvas class="firewall" ref="firewall">
+  </canvas>
 </template>
 
 <script lang="ts">
   import { Component, Vue, Prop } from 'vue-property-decorator';
-  import FireRow from '@/components/FireRow.vue';
-  import FireCell from '@/components/FireCell.vue';
   import { fireColorsPalette } from '@/consts/colors';
   import { RGB } from '@/types/rgb';
+  const COLORS: RGB[] = fireColorsPalette;
   const PIXEL_MIN_INTENSITY = 0;
   const PIXEL_MAX_INTENSITY = 36;
+  const PIXEL_SIZE = 4;
 
-  @Component({
-    components: {
-      'fire-row': FireRow,
-      'fire-cell': FireCell,
-    },
-  })
+  @Component
   export default class FireWall extends Vue {
-    @Prop()
-    public debug!: boolean;
-
     @Prop()
     public width!: number;
 
@@ -41,24 +22,26 @@
 
     public pixels: number[] = [];
 
-    private colors: RGB[] = fireColorsPalette;
-
     private baseIntensity = PIXEL_MAX_INTENSITY;
+
+    private context!: CanvasRenderingContext2D;
+
+    public $refs!: {
+      firewall: HTMLCanvasElement;
+    };
 
     get area(): number {
       return this.width * this.height;
     }
 
-    public initializeFireDataSource() {
+    private initializeDrawArea(): void {
+      this.$refs.firewall.width = this.width * PIXEL_SIZE;
+      this.$refs.firewall.height = this.height * PIXEL_SIZE;
+      this.context = this.$refs.firewall.getContext('2d') as CanvasRenderingContext2D;
+    }
+
+    public initializeFireDataSource(): void {
       this.pixels = new Array(this.area).fill(PIXEL_MIN_INTENSITY);
-    }
-
-    private getColor(intensity: number): string {
-      return `${this.colors[intensity].r}, ${this.colors[intensity].g}, ${this.colors[intensity].b}`;
-    }
-
-    private calculatePixelIndex(row: number, column: number, width: number): number {
-      return (column + ((row * width) - width)) - 1;
     }
 
     private generateFireSource(intensity: number = PIXEL_MAX_INTENSITY): void {
@@ -73,6 +56,20 @@
           : currentIntensity,
       ).
       reverse();
+    }
+
+    private renderFire(): void {
+      for (let row = 0; row < this.height; ++row) {
+        for (let column = 0; column < this.width; ++column) {
+          const index = column + (row * this.width);
+          const intensity = this.pixels[index];
+          const color = COLORS[intensity];
+          const colorString = `${color.r}, ${color.g}, ${color.b}`;
+
+          this.context.fillStyle = `rgb(${colorString})`;
+          this.context.fillRect(column * PIXEL_SIZE, row * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+        }
+      }
     }
 
     private updateFirePixelIntensity(index: number): number {
@@ -99,6 +96,8 @@
           ? this.updateFirePixelIntensity(index)
           : currentPixelIntensity,
       );
+
+      this.renderFire();
     }
 
     private initializeFirePropagation(): number {
@@ -134,28 +133,11 @@
     private created() {
       this.initializeFireDataSource();
       this.generateFireSource();
+    }
+
+    private mounted() {
       this.initializeFirePropagation();
+      this.initializeDrawArea();
     }
   }
 </script>
-
-<style>
-  table {
-    border-collapse: collapse;
-    border: 6px solid #000;
-  }
-
-  td {
-    padding: 12px;
-    border: 1px solid #ccc;
-    position: relative;
-  }
-
-  td .index {
-    color: #ccc;
-    font-size: 10px;
-    position: absolute;
-    right: 3px;
-    top: 3px;
-  }
-</style>
