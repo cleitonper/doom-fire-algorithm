@@ -6,6 +6,10 @@ This repository contains a javascript (with [`vue.js`](https://vuejs.org/)) impl
 
 ___
 
+## Online demo
+
+Click [here](https://feature-canvas--vue-doom-fire.netlify.com/) to see an online demo of this project.
+
 ## See
 
 [Implementation using table](https://github.com/cleitonper/doom-fire-algorithm/#readme)
